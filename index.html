@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>এম-ওয়ালেট আল্টিমেট - ডিজিটাল ড্যাশবোর্ড</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+        :root {
+            --sidebar-bg: #1F2937; --main-bg: #111827; --card-bg: #1F2937; --text-dark: #F9FAFB; --text-light: #9CA3AF; --text-white: #FFFFFF; --accent-primary: #22D3EE; --accent-green: #34D399; --accent-orange: #FBBF24; --accent-red: #F87171; --border-color: #374151; --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1); --visa-card-start: #0D9488; --visa-card-end: #14B8A6; --sidebar-width: 260px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Poppins', 'Hind Siliguri', sans-serif; background-color: var(--main-bg); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; }
+        .dashboard-container { display: flex; width: 100%; height: 100%; }
+        .sidebar { width: var(--sidebar-width); background-color: var(--sidebar-bg); padding: 25px 0; display: flex; flex-direction: column; height: 100%; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-color); transition: width 0.3s ease; }
+        .sidebar-header { padding: 0 25px 30px 25px; display: flex; align-items: center; gap: 15px; }
+        .sidebar-header .logo-icon { width: 45px; height: 45px; background: linear-gradient(45deg, var(--accent-primary), #0E7490); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--text-white); font-size: 24px; font-weight: bold; flex-shrink: 0; }
+        .sidebar-header .logo-text { font-size: 1.2rem; font-weight: 600; }
+        .sidebar nav ul { list-style: none; } .sidebar nav ul li a { display: flex; align-items: center; padding: 14px 25px; color: var(--text-light); text-decoration: none; font-size: 15px; font-weight: 500; border-left: 4px solid transparent; transition: all 0.3s ease; margin: 5px 0; } .sidebar nav ul li a.active, .sidebar nav ul li a:hover { color: var(--accent-primary); background-color: rgba(34, 211, 238, 0.08); border-left-color: var(--accent-primary); }
+        .main-content-wrapper { flex-grow: 1; margin-left: var(--sidebar-width); height: 100vh; overflow-y: auto; padding: 30px; transition: margin-left 0.3s ease; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .top-bar .search-bar input { padding: 10px 15px 10px 40px; border: 1px solid var(--border-color); border-radius: 20px; font-size: 14px; width: 300px; background-color: var(--card-bg); color: var(--text-dark); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%239CA3AF' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 15px center; transition: all 0.3s; }
+        .top-bar .search-bar input:focus { border-color: var(--accent-primary); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.3); outline: none; }
+        .top-bar .user-actions { display: flex; align-items: center; gap: 20px; } .top-bar .realtime-clock { font-size: 14px; color: var(--text-light); font-weight: 500; } .user-profile { display: flex; align-items: center; cursor: pointer; } .user-profile .user-name { font-weight: 600; font-size: 15px; }
+        .content-area { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; } .middle-column, .right-column { display: flex; flex-direction: column; gap: 30px; }
+        .card { background-color: var(--card-bg); padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); transition: transform 0.3s ease, box-shadow 0.3s ease; } .card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; } .card-header h3 { margin: 0; font-size: 18px; font-weight: 600; }
+        .action-button { background-color: var(--accent-primary); color: #111827; padding: 9px 18px; border: none; border-radius: 20px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; } .action-button:hover { background-color: #67E8F9; transform: translateY(-2px); }
+        .visa-card-display { background: linear-gradient(120deg, var(--visa-card-start), var(--visa-card-end)); border-radius: 16px; padding: 25px; color: var(--text-white); margin-bottom: 20px; position: relative; box-shadow: 0 8px 16px rgba(0,0,0,0.2); overflow: hidden; }
+        .visa-card-display .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; } .visa-card-display .card-top .brand { font-size: 22px; font-weight: bold; } .visa-card-display .card-top .chip { width: 50px; height: 40px; background-color: #FFD700; border-radius: 6px; background-image: linear-gradient(45deg, #DAA520, #F0E68C); }
+        .visa-card-display .card-main-number { font-family: 'monospace'; font-size: 24px; letter-spacing: 3px; margin-bottom: 20px; text-align: center; }
+        .visa-card-display .card-bottom { display: flex; justify-content: space-between; font-size: 14px; } .visa-card-display .card-bottom div span { display: block; font-size: 11px; opacity: 0.8; text-transform: uppercase; }
+        .balance-details { margin-bottom: 20px; } .balance-details .total-balance-label { font-size: 14px; color: var(--text-light); } .balance-details .total-balance-amount { font-size: 32px; font-weight: 700; margin: 5px 0; color: var(--accent-green); }
+        .balance-breakdown { font-size: 13px; color: var(--text-light); margin-top: -15px; margin-bottom: 20px; }
+        .income-expenses-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; } .income-expenses-row > div { display: flex; align-items: center; background-color: var(--main-bg); padding: 15px; border-radius: 12px; }
+        .income-expenses-row .icon-wrapper { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-size: 20px; flex-shrink: 0; }
+        .income-expenses-row .income .icon-wrapper { background-color: rgba(52, 211, 153, 0.2); color: var(--accent-green); } .income-expenses-row .expenses .icon-wrapper { background-color: rgba(251, 191, 36, 0.2); color: var(--accent-orange); } .income-expenses-row .fees .icon-wrapper { background-color: rgba(248, 113, 113, 0.2); color: var(--accent-red); }
+        .income-expenses-row .text-details .label { font-size: 13px; color: var(--text-light); } .income-expenses-row .text-details .amount { font-size: 16px; font-weight: 600; }
+        .actions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 15px; } .action-item { display: flex; flex-direction: column; align-items: center; padding: 15px 10px; border-radius: 12px; cursor: pointer; transition: background-color 0.2s, transform 0.2s; border: 1px solid var(--border-color); } .action-item:hover { background-color: var(--main-bg); transform: translateY(-3px); border-color: var(--accent-primary); }
+        .action-item .action-icon { width: 48px; height: 48px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--text-dark); background-color: var(--main-bg); }
+        .action-item .action-name { font-size: 13px; color: var(--text-light); text-align: center; font-weight: 500; }
+        .recent-transactions-list ul { list-style: none; max-height: 400px; overflow-y: auto; padding-right: 10px; } .recent-transactions-list li { display: flex; align-items: center; padding: 15px 5px; border-bottom: 1px solid var(--border-color); } .recent-transactions-list li:last-child { border-bottom: none; }
+        .recent-transactions-list .tx-icon { width: 40px; height: 40px; border-radius: 50%; margin-right: 15px; display: flex; align-items: center; justify-content: center; background-color: var(--main-bg); }
+        .recent-transactions-list .tx-details { flex-grow: 1; } .recent-transactions-list .tx-details .name { font-size: 15px; font-weight: 500; } .recent-transactions-list .tx-details .type { font-size: 13px; color: var(--text-light); }
+        .recent-transactions-list .tx-amount { font-size: 15px; font-weight: 600; text-align: right; } .recent-transactions-list .tx-amount.income { color: var(--accent-green); } .recent-transactions-list .tx-amount.outcome { color: var(--accent-red); }
+        .view-all-tx a { color: var(--accent-primary); font-size: 14px; font-weight: 500; text-decoration: none; }
+        .modal { display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(5px); }
+        .modal-content { background-color: var(--card-bg); margin: auto; padding: 30px; border-radius: 16px; width: 100%; max-width: 520px; box-shadow: var(--shadow-lg); position: relative; border: 1px solid var(--border-color); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); } .modal-header h3 { margin: 0; font-size: 20px; color: var(--accent-primary); font-weight: 600; } .close-button { color: var(--text-light); font-size: 28px; font-weight: normal; cursor: pointer; background:none; border:none; line-height: 1; } .close-button:hover { color: var(--text-dark); }
+        .form-group { margin-bottom: 20px; } .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-light); font-size: 14px; } .form-group input, .form-group select { width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 15px; font-family: 'Poppins', 'Hind Siliguri', sans-serif; background-color: var(--main-bg); color: var(--text-dark); } .form-group input:focus, .form-group select:focus { border-color: var(--accent-primary); outline: none; box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.3); }
+        .form-group input[readonly] { background-color: #374151; cursor: not-allowed; }
+        .submit-button { background-color: var(--accent-primary); color: #111827; padding: 12px 20px; border: none; border-radius: 25px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; transition: all 0.3s ease; } .submit-button:hover { background-color: #67E8F9; transform: translateY(-2px); }
+        
+        /* --- Prémium স্ট্যাটাস ভিউ --- */
+        .status-view-container { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--main-bg); z-index: 9998; justify-content: center; align-items: center; text-align: center; animation: fadeIn 0.5s ease-out; }
+        .status-view-content { max-width: 600px; padding: 20px; }
+        .status-icon { font-size: 5em; margin-bottom: 20px; } .status-icon.success { color: var(--accent-green); } .status-icon.error { color: var(--accent-red); }
+        .status-view-content h1 { font-size: 2.5em; margin-bottom: 10px; } .status-view-content .message { font-size: 1.2em; color: var(--text-light); margin-bottom: 30px; }
+        .details-summary { text-align: left; background-color: var(--card-bg); padding: 25px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 30px; }
+        .details-summary p { margin: 12px 0; display: flex; justify-content: space-between; font-size: 1.1em; padding-bottom: 8px; border-bottom: 1px dashed var(--border-color); }
+        .details-summary p:last-child { border: none; } .details-summary .label { color: var(--text-light); } .details-summary .value { font-weight: 600; word-break: break-all; }
+        .back-button { padding: 12px 30px; background: var(--accent-primary); color: #111827; border: none; border-radius: 50px; cursor: pointer; text-decoration: none; transition: all .3s ease; font-weight: 600; font-size: 1.1em; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        /* --- রেসপন্সিভ ডিজাইন --- */
+        @media (max-width: 1200px) { .content-area { grid-template-columns: 1fr; } }
+        @media (max-width: 992px) { .sidebar { width: 80px; } .main-content-wrapper { margin-left: 80px; } .sidebar-header .logo-text, .sidebar nav ul li a .nav-text { display: none; } .sidebar nav ul li a { justify-content: center; padding: 14px 0; } .top-bar .search-bar input { width: 200px; } .income-expenses-row { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { body { display: block; height: auto; overflow-y: auto; } .dashboard-container { flex-direction: column; } .main-content-wrapper { margin-left: 0; padding: 15px; height: auto; } .top-bar { flex-direction: column; align-items: stretch; gap: 15px; } .top-bar .search-bar { width: 100%; } .top-bar .search-bar input { width: 100%; } .top-bar .user-actions { width: 100%; justify-content: space-between; } .sidebar { width: 100%; height: auto; position: static; flex-direction: row; overflow-x: auto; padding: 10px 0; border-right: none; border-bottom: 1px solid var(--border-color); } .sidebar-header { padding: 0 15px; } .sidebar nav ul { display: flex; } .sidebar nav ul li a { border-left:none; border-bottom: 3px solid transparent; } }
+    </style>
+</head>
+<body>
+     <div id="main-dashboard" class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header"><div class="logo-icon">M</div><span class="logo-text">এম-ওয়ালেট</span></div>
+            <nav><ul><li><a href="#" class="active"><span class="icon">📊</span> <span class="nav-text">ড্যাশবোর্ড</span></a></li></ul></nav>
+        </aside>
+        <main class="main-content-wrapper">
+            <div class="top-bar">
+                <div class="search-bar"><input type="text" placeholder="লেনদেন, বিল এবং আরও খুঁজুন..."></div>
+                <div class="user-actions"><div class="realtime-clock" id="realTimeClockDisplay"></div><div class="user-profile"><span class="user-name" id="cardHolderNameDisplayTop"></span></div></div>
+            </div>
+            <div class="content-area">
+                <div class="middle-column">
+                    <div class="card my-card-section"><div class="card-header"><h3>আমার কার্ড</h3><button class="action-button" onclick="openModal('addBalanceModal')">ব্যালেন্স যোগ/পেমেন্ট</button></div><div class="visa-card-display"><div class="card-top"><div class="chip"></div><span class="brand">VISA</span></div><div class="card-main-number" id="cardNumberObscured"></div><div class="card-bottom"><div><span>কার্ড হোল্ডার</span><span id="cardHolderNameDisplayCard"></span></div><div><span>বৈধতা শেষ</span><span id="cardExpiryDateDisplay"></span></div></div></div><div class="balance-details"><div class="total-balance-label">মোট ব্যবহারযোগ্য ব্যালেন্স (BDT)</div><div class="total-balance-amount" id="displayTotalBalance"></div><div class="balance-breakdown" id="balanceBreakdownDisplay"></div></div><div class="income-expenses-row"><div class="income"><div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/></svg></div><div class="text-details"><span class="label">মোট জমা (BDT)</span><span class="amount" id="displayIncome"></span></div></div><div class="expenses"><div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/></svg></div><div class="text-details"><span class="label">মোট খরচ (BDT)</span><span class="amount" id="displayExpenses"></span></div></div><div class="fees"><div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M4 4.5V1s0-.5.5-.5h7a.5.5 0 0 1 .5.5v3.5h-8Zm9 0V1a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v3.5h11Z"/><path d="M3.5 5a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-9ZM4 5.5h8v9H4v-9Z"/></svg></div><div class="text-details"><span class="label">মোট ফি (BDT)</span><span class="amount" id="displayFees"></span></div></div></div></div>
+                    <div class="card"><div class="card-header"><h3>দ্রুত কার্যক্রম</h3></div><div class="actions-grid"><div class="action-item" onclick="openModal('transferModal')"><div class="action-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/><path d="M5 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 5 8zm0-2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm0 5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5z"/><path d="M2 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm0 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm0 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg></div><span class="action-name">ট্রান্সফার</span></div><div class="action-item" onclick="openModal('cashOutModal')"><div class="action-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M1 3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1H1zm12.135 1.334a.5.5 0 0 0-.453-.245H3.318a.5.5 0 0 0-.453.245L1.22 7.865A.5.5 0 0 0 1 8.135V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.135a.5.5 0 0 0-.22-.43L13.135 4.334zM2 12V8.5h12V12H2zM13.5 7h-11l.75-2.5h9.5L13.5 7z"/></svg></div><span class="action-name">ক্যাশ আউট</span></div><div class="action-item" onclick="openModal('rechargeModal')"><div class="action-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M5 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2H5zm0 2h6v1H5V3zm0 2h6v1H5V5zm0 2h6v1H5V7zm0 2h6v1H5V9zm0 2h6v1H5v-1z"/></svg></div><span class="action-name">রিচার্জ</span></div><div class="action-item" onclick="openModal('billPayModal')"><div class="action-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M1.5 0A1.5 1.5 0 0 0 0 1.5v13A1.5 1.5 0 0 0 1.5 16h13a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 14.5 0h-13zM1 1.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v13a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-13z"/><path d="M4 4h8v1H4V4zm0 2h8v1H4V6zm0 2h8v1H4V8zm0 2h3v1H4v-1zm0 2h3v1H4v-1zm5-6h3v1h-3V4zm0 2h3v1h-3V6zm0 2h3v1h-3V8z"/></svg></div><span class="action-name">বিল পে</span></div></div></div>
+                    <div class="card recent-transactions-list"><div class="card-header"><h3>সাম্প্রতিক লেনদেন</h3></div><ul id="recentTxList"></ul><div class="view-all-tx"><a href="#" id="loadMoreTxBtn">আরও দেখুন</a></div></div>
+                </div>
+                <div class="right-column">
+                    <div class="card"><div class="card-header"><h3>ম্যানেজমেন্ট ও অন্যান্য</h3></div><div class="actions-grid"><div class="action-item" onclick="openModal('addBankFundsModal')"><div class="action-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M8.5 12.5a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v2zM2 11.5a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 0-1h-6a.5.5 0 0 0-.5.5zm2.5-6.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-2zM6 6.5a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 0-1h-6a.5.5 0 0 0-.5.5z"/><path d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V2zm1 0v12h14V2H1z"/></svg></div><span class="action-name">ব্যাংক ফান্ড</span></div><div class="action-item" onclick="openModal('addUserCashModal')"><div class="action-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M4 3.06h2.726c1.22 0 2.12.575 2.325 1.724H4v1.051h5.051C8.855 7.001 8 7.558 6.788 7.558H4v1.317L8.437 14h2.11L6.095 8.884h.855c2.316-.018 3.465-1.476 3.688-3.049H12V4.784h-1.345c-.08-.778-.357-1.335-.793-1.732H12V2H4v1.06z"/></svg></div><span class="action-name">ইউজার ক্যাশ</span></div><div class="action-item" onclick="openModal('takeLoanModal')"><div class="action-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M5 8.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm.5 2.42a.5.5 0 0 1 0-.84l3-1.733a.5.5 0 0 1 .5.84l-3 1.733a.5.5 0 0 1-.5 0z"/><path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10 0H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/></svg></div><span class="action-name">লোন নিন</span></div><div class="action-item" onclick="resetAllData()"><div class="action-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg></div><span class="action-name">রিসেট</span></div></div></div>
+                    <div id="loan-info-card" class="card" style="display: none;"><div class="card-header"><h3>লোনের তথ্য</h3></div><div id="loanInfoDisplay"></div></div>
+                </div>
+            </div>
+        </main>
+     </div>
+    
+    <div id="status-view" class="status-view-container"><div class="status-view-content"><div id="status-icon-div"></div><h1 id="status-title"></h1><p class="message" id="status-message"></p><div class="details-summary" id="status-details-summary" style="display: none;"></div><button class="back-button" onclick="hideStatusView()">ড্যাশবোর্ডে ফিরে যান</button></div></div>
+
+    <div id="addBalanceModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>ব্যালেন্স যোগ/পেমেন্ট করুন</h3><button class="close-button" onclick="closeModal('addBalanceModal')">&times;</button></div><div class="form-group"><label for="addAmount">টাকার পরিমাণ:</label><input type="number" id="addAmount" placeholder="পরিমাণ লিখুন"></div><button class="submit-button" onclick="addBalance()">নিশ্চিত করুন</button></div></div>
+    <div id="addBankFundsModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>ব্যাংক ফান্ড যোগ করুন</h3><button class="close-button" onclick="closeModal('addBankFundsModal')">&times;</button></div><div class="form-group"><label for="addBankAmount">টাকার পরিমাণ (BDT):</label><input type="number" id="addBankAmount" placeholder="পরিমাণ লিখুন"></div><button class="submit-button" onclick="addBankFunds()">যোগ করুন</button></div></div>
+    <div id="addUserCashModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>ব্যক্তিগত ক্যাশ জমা দিন</h3><button class="close-button" onclick="closeModal('addUserCashModal')">&times;</button></div><div class="form-group"><label for="paymentMethod">পেমেন্ট মাধ্যম:</label><select id="paymentMethod"><option value="bKash">বিকাশ</option><option value="Nagad">নগদ</option><option value="Rocket">রকেট</option><option value="Upay">উপায়</option><option value="Other">অন্যান্য</option></select></div><div class="form-group"><label for="addUserAmount">টাকার পরিমাণ (BDT):</label><input type="number" id="addUserAmount" placeholder="পরিমাণ লিখুন"></div><button class="submit-button" onclick="addUserCash()">জমা দিন</button></div></div>
+    <div id="takeLoanModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>কিস্তিতে লোন নিন</h3><button class="close-button" onclick="closeModal('takeLoanModal')">&times;</button></div><div class="form-group"><label for="loanAmount">লোনের পরিমাণ (BDT):</label><input type="number" id="loanAmount" placeholder="পরিমাণ লিখুন"></div><div class="form-group"><label for="loanInstallments">কিস্তির সংখ্যা (মাস):</label><select id="loanInstallments"><option value="3">৩ মাস</option><option value="6">৬ মাস</option><option value="12">১২ মাস</option></select></div><button class="submit-button" onclick="takeLoan()">লোন নিন</button></div></div>
+    <div id="transferModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>অর্থ পাঠান</h3><button class="close-button" onclick="closeModal('transferModal')">&times;</button></div><div class="form-group"><label for="transferTo">প্রাপকের অ্যাকাউন্ট/মোবাইল নম্বর:</label><input type="text" id="transferTo" placeholder="নম্বর লিখুন"></div><div class="form-group"><label for="transferAmount">টাকার পরিমাণ:</label><input type="number" id="transferAmount" placeholder="পরিমাণ লিখুন"></div><button class="submit-button" onclick="transferMoney()">পাঠান</button></div></div>
+    <div id="cashOutModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>ক্যাশ আউট</h3><button class="close-button" onclick="closeModal('cashOutModal')">&times;</button></div><div class="form-group"><label for="cashOutMethod">মাধ্যম:</label><select id="cashOutMethod" onchange="updateCashOutFee()"><option value="bkash">বিকাশ</option><option value="nagad">নগদ</option><option value="rocket">রকেট</option><option value="upay">উপায়</option><option value="dbbl">ডাচ-বাংলা</option><option value="atm">এটিএম</option></select></div><div class="form-group"><label for="cashOutAmount">টাকার পরিমাণ:</label><input type="number" id="cashOutAmount" placeholder="পরিমাণ লিখুন" oninput="updateCashOutFee()"></div><div class="form-group"><label for="cashOutFee">ফি:</label><input type="text" id="cashOutFee" readonly></div><button class="submit-button" onclick="cashOut()">ক্যাশ আউট করুন</button></div></div>
+    <div id="rechargeModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>মোবাইল রিচার্জ</h3><button class="close-button" onclick="closeModal('rechargeModal')">&times;</button></div><div class="form-group"><label for="rechargeNumber">মোবাইল নম্বর:</label><input type="text" id="rechargeNumber" placeholder="নম্বর লিখুন"></div><div class="form-group"><label for="rechargeAmount">টাকার পরিমাণ:</label><input type="number" id="rechargeAmount" placeholder="পরিমাণ লিখুন"></div><button class="submit-button" onclick="mobileRecharge()">রিচার্জ করুন</button></div></div>
+    <div id="billPayModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>বিল পে</h3><button class="close-button" onclick="closeModal('billPayModal')">&times;</button></div><div class="form-group"><label for="billType">বিলের ধরন:</label><input type="text" id="billType" placeholder="যেমন: বিদ্যুৎ, গ্যাস"></div><div class="form-group"><label for="billAmount">টাকার পরিমাণ:</label><input type="number" id="billAmount" placeholder="পরিমাণ লিখুন"></div><button class="submit-button" onclick="payBill()">বিল দিন</button></div></div>
+    
+    <script>
+        // --- গ্লোবাল ভ্যারিয়েবল ও কনস্ট্যান্ট ---
+        const nidData = { name: "MD. SADMAN SADIK LIMON", cardType: "ভিসা/মাস্টারকার্ড" };
+        const creditCardPolicyData = { cardHolderName: "সাদমান সাদিক", cardNumberObscured: "4012 8888 8888 9876", expirationDate: "12/30" };
+        let userBalance, bankBalance, currentIncome, currentExpenses, currentFees, transactions, loanDetails;
+        const cashOutCharges = { bkash: 0.0185, nagad: 0.0145, rocket: 0.018, upay: 0.01, dbbl: 0.018, atm: 9 };
+
+        // --- Local Storage ফাংশন ---
+        function loadDataFromLocalStorage() {
+            userBalance = parseFloat(localStorage.getItem('userBalance_v12')) || 0.00;
+            bankBalance = parseFloat(localStorage.getItem('bankBalance_v12')) || 0.00;
+            currentIncome = parseFloat(localStorage.getItem('currentIncome_v12')) || 0.00;
+            currentExpenses = parseFloat(localStorage.getItem('currentExpenses_v12')) || 0.00;
+            currentFees = parseFloat(localStorage.getItem('currentFees_v12')) || 0.00;
+            transactions = JSON.parse(localStorage.getItem('transactions_v12')) || [];
+            loanDetails = JSON.parse(localStorage.getItem('loanDetails_v12')) || null;
+        }
+        function saveDataToLocalStorage() {
+            localStorage.setItem('userBalance_v12', userBalance.toFixed(2));
+            localStorage.setItem('bankBalance_v12', bankBalance.toFixed(2));
+            localStorage.setItem('currentIncome_v12', currentIncome.toFixed(2));
+            localStorage.setItem('currentExpenses_v12', currentExpenses.toFixed(2));
+            localStorage.setItem('currentFees_v12', currentFees.toFixed(2));
+            localStorage.setItem('transactions_v12', JSON.stringify(transactions));
+            localStorage.setItem('loanDetails_v12', JSON.stringify(loanDetails));
+        }
+        
+        // --- Prémium স্ট্যাটাস ভিউ ফাংশন ---
+        function showStatusView(title, message, details = null, status = 'success') {
+            document.getElementById('main-dashboard').style.display = 'none';
+            const statusView = document.getElementById('status-view');
+            document.getElementById('status-icon-div').innerHTML = `<div class="status-icon ${status}">${status === 'success' ? '✅' : '❌'}</div>`;
+            document.getElementById('status-title').textContent = title;
+            document.getElementById('status-message').textContent = message;
+            const summaryDiv = document.getElementById('status-details-summary');
+            if (details && Object.keys(details).length > 0) {
+                summaryDiv.innerHTML = Object.entries(details).map(([key, value]) => `<p><span class="label">${key}:</span> <span class="value">${value}</span></p>`).join('');
+                summaryDiv.style.display = 'block';
+            } else {
+                summaryDiv.style.display = 'none';
+            }
+            statusView.style.display = 'flex';
+        }
+        function hideStatusView() { document.getElementById('status-view').style.display = 'none'; document.getElementById('main-dashboard').style.display = 'flex'; updateUIData(); }
+
+        // --- UI আপডেট ও সেটআপ ফাংশন ---
+        function formatCurrency(amount) { return `৳${parseFloat(amount).toLocaleString('bn-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; }
+        function updateUIData() {
+            const totalBalance = userBalance + bankBalance;
+            document.getElementById('displayTotalBalance').textContent = formatCurrency(totalBalance);
+            document.getElementById('balanceBreakdownDisplay').textContent = `(ব্যক্তিগত: ${formatCurrency(userBalance)} + ব্যাংক: ${formatCurrency(bankBalance)})`;
+            document.getElementById('displayIncome').textContent = formatCurrency(currentIncome);
+            document.getElementById('displayExpenses').textContent = formatCurrency(currentExpenses);
+            document.getElementById('displayFees').textContent = formatCurrency(currentFees);
+            const loanInfoEl = document.getElementById('loanInfoDisplay');
+            const loanCardEl = document.getElementById('loan-info-card');
+            if (loanDetails) {
+                loanInfoEl.innerHTML = `বকেয়া লোন: ${formatCurrency(loanDetails.remainingLoan)}<br>মাসিক কিস্তি: ${formatCurrency(loanDetails.monthlyPayment)} (${loanDetails.installments} মাসের জন্য)`;
+                loanCardEl.style.display = 'block';
+            } else {
+                loanCardEl.style.display = 'none';
+            }
+            renderTransactions();
+            saveDataToLocalStorage();
+        }
+        
+        // --- ব্যাংক ও ইউজার সেগমেন্টের জন্য ফাংশন ---
+        function addBankFunds() { const amount = parseFloat(document.getElementById('addBankAmount').value); if (isNaN(amount) || amount <= 0) { showStatusView('ত্রুটি', 'সঠিক পরিমাণ লিখুন।', null, 'error'); return; } bankBalance += amount; addTransaction('ব্যাংক ফান্ড', 'ব্যাংক থেকে ফান্ড প্রাপ্তি', amount, 'income'); closeModal('addBankFundsModal'); showStatusView('সফল', `${formatCurrency(amount)} ব্যাংক ফান্ড হিসেবে যোগ হয়েছে।`, {'নতুন ব্যাংক ব্যালেন্স': formatCurrency(bankBalance)}); }
+        function addUserCash() { const amount = parseFloat(document.getElementById('addUserAmount').value); const method = document.getElementById('paymentMethod').value; if (isNaN(amount) || amount <= 0) { showStatusView('ত্রুটি', 'সঠিক পরিমাণ লিখুন।', null, 'error'); return; } userBalance += amount; currentIncome += amount; addTransaction('ব্যক্তিগত ক্যাশ', `${method} দিয়ে জমা`, amount, 'income'); closeModal('addUserCashModal'); showStatusView('সফল', `${formatCurrency(amount)} ব্যক্তিগত ক্যাশ হিসেবে যোগ হয়েছে।`, {'নতুন ব্যক্তিগত ব্যালেন্স': formatCurrency(userBalance)}); }
+        function takeLoan() { const amount = parseFloat(document.getElementById('loanAmount').value); const installments = parseInt(document.getElementById('loanInstallments').value); if (isNaN(amount) || amount <= 0) { showStatusView('ত্রুটি', 'সঠিক পরিমাণ লিখুন।', null, 'error'); return; } if (amount > bankBalance) { showStatusView('ত্রুটি', 'ব্যাংক ফান্ডে অপর্যাপ্ত ব্যালেন্স।', {'আপনার অনুরোধ': formatCurrency(amount), 'ব্যাংকে আছে': formatCurrency(bankBalance)}, 'error'); return; } if (loanDetails) { showStatusView('ত্রুটি', 'আপনার ইতিমধ্যে একটি লোন চলমান আছে।', null, 'error'); return; } bankBalance -= amount; userBalance += amount; loanDetails = { totalLoan: amount, remainingLoan: amount, installments: installments, monthlyPayment: amount / installments }; addTransaction('লোন গ্রহণ', `${installments} মাসের কিস্তিতে`, amount, 'income'); closeModal('takeLoanModal'); showStatusView('লোন সফল', `${formatCurrency(amount)} লোন হিসেবে আপনার ব্যালেন্সে যোগ হয়েছে।`, { 'মাসিক কিস্তি': formatCurrency(loanDetails.monthlyPayment), 'কিস্তির সংখ্যা': `${installments} মাস` }); }
+
+        // --- আর্থিক লেনদেন ফাংশন ---
+        function addBalance() { const amount = parseFloat(document.getElementById('addAmount').value); if (isNaN(amount) || amount <= 0) { showStatusView('ত্রুটি', 'সঠিক পরিমাণ লিখুন।', null, 'error'); return; } let paymentApplied = amount; let details = {'প্রদত্ত অর্থ': formatCurrency(amount)}; if (loanDetails && paymentApplied > 0) { const paidToLoan = Math.min(paymentApplied, loanDetails.remainingLoan); loanDetails.remainingLoan -= paidToLoan; paymentApplied -= paidToLoan; details['লোন পরিশোধ'] = formatCurrency(paidToLoan); if (loanDetails.remainingLoan <= 0) { details['লোনের স্থিতি'] = 'সম্পূর্ণ পরিশোধিত'; loanDetails = null; } } userBalance += paymentApplied; currentIncome += amount; addTransaction('ব্যালেন্স পেমেন্ট', 'পেমেন্ট করা হয়েছে', amount, 'income'); closeModal('addBalanceModal'); showStatusView('পেমেন্ট সফল', `${formatCurrency(amount)} পেমেন্ট সফল হয়েছে।`, details); }
+        function processFinancialTransaction(amount, type, description, fee = 0) {
+            const totalCost = amount + fee;
+            const totalAvailable = userBalance + bankBalance;
+            if (totalCost > totalAvailable) { showStatusView('অপর্যাপ্ত ব্যালেন্স', `আপনার মোট ব্যালেন্স ${formatCurrency(totalAvailable)}। প্রয়োজন ${formatCurrency(totalCost)}`, null, 'error'); return false; }
+            
+            let deductedFromUser = Math.min(totalCost, userBalance);
+            userBalance -= deductedFromUser;
+            let remainingToDeduct = totalCost - deductedFromUser;
+            bankBalance -= remainingToDeduct;
+            
+            currentExpenses += amount;
+            currentFees += fee;
+            addTransaction(type, description, amount, 'outcome');
+            if (fee > 0) addTransaction('ফি', `${type} চার্জ`, fee, 'outcome');
+            
+            const details = { 'লেনদেনের পরিমাণ': formatCurrency(amount), 'ফি': formatCurrency(fee), 'মোট খরচ': formatCurrency(totalCost) };
+            showStatusView('লেনদেন সফল', `${formatCurrency(amount)} সফলভাবে খরচ হয়েছে।`, details);
+            return true;
+        }
+        function transferMoney() { const recipient = document.getElementById('transferTo').value.trim(); const amount = parseFloat(document.getElementById('transferAmount').value); if (!recipient) { showStatusView('ত্রুটি', 'প্রাপকের নম্বর দিন।', null, 'error'); return; } if (processFinancialTransaction(amount, 'ট্রান্সফার', `প্রেরিত: ${recipient}`)) closeModal('transferModal'); }
+        function mobileRecharge() { const number = document.getElementById('rechargeNumber').value.trim(); const amount = parseFloat(document.getElementById('rechargeAmount').value); if (!number) { showStatusView('ত্রুটি', 'মোবাইল নম্বর দিন।', null, 'error'); return; } if (processFinancialTransaction(amount, 'মোবাইল রিচার্জ', `নম্বর: ${number}`)) closeModal('rechargeModal'); }
+        function payBill() { const type = document.getElementById('billType').value.trim(); const amount = parseFloat(document.getElementById('billAmount').value); if (!type) { showStatusView('ত্রুটি', 'বিলের ধরন লিখুন।', null, 'error'); return; } if (processFinancialTransaction(amount, 'বিল পে', `বিলের ধরন: ${type}`)) closeModal('billPayModal'); }
+        function updateCashOutFee() { const amount = parseFloat(document.getElementById('cashOutAmount').value) || 0; const method = document.getElementById('cashOutMethod').value; let fee = 0; if (amount > 0) { if (method === 'atm') { fee = cashOutCharges.atm; } else { fee = amount * cashOutCharges[method]; } } document.getElementById('cashOutFee').value = formatCurrency(fee); }
+        function cashOut() { const amount = parseFloat(document.getElementById('cashOutAmount').value); const method = document.getElementById('cashOutMethod').value; const fee = parseFloat(document.getElementById('cashOutFee').value.replace('৳', '').replace(/,/g, '')); if (processFinancialTransaction(amount, 'ক্যাশ আউট', `মাধ্যম: ${method.toUpperCase()}`, fee)) closeModal('cashOutModal'); }
+
+        function addTransaction(type, description, amount, status) { const newTx = { date: new Date().toLocaleDateString('bn-BD'), brand: type, type: description, amount: amount, status: status }; transactions.unshift(newTx); if (transactions.length > 100) transactions.pop(); }
+        function renderTransactions() { const listEl = document.getElementById('recentTxList'); listEl.innerHTML = ''; const toShow = transactions.slice(0, 5); if (toShow.length === 0) { listEl.innerHTML = '<li><center style="padding: 20px; color: var(--text-light);"><i>কোনো লেনদেন পাওয়া যায়নি।</i></center></li>'; return; } toShow.forEach(tx => { const li = document.createElement('li'); const icon = tx.status === 'income' ? '📥' : '📤'; li.innerHTML = `<div class="tx-icon">${icon}</div><div class="tx-details"><div class="name">${tx.brand}</div><div class="type">${tx.type}</div></div><div class="tx-amount ${tx.status}">${tx.status === 'income' ? '+' : '-'} ${formatCurrency(tx.amount)}</div>`; listEl.appendChild(li); }); }
+
+        // --- রিসেট ফাংশন ---
+        function resetAllData() { localStorage.clear(); location.reload(); }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+        function openModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
+
+        // --- Initialization ---
+        window.onload = () => {
+            loadDataFromLocalStorage();
+            document.getElementById('cardHolderNameDisplayTop').textContent = creditCardPolicyData.cardHolderName;
+            document.getElementById('cardNumberObscured').textContent = creditCardPolicyData.cardNumberObscured;
+            document.getElementById('cardHolderNameDisplayCard').textContent = creditCardPolicyData.cardHolderName;
+            document.getElementById('cardExpiryDateDisplay').textContent = creditCardPolicyData.expirationDate;
+            updateUIData();
+            setInterval(() => { document.getElementById('realTimeClockDisplay').textContent = new Date().toLocaleDateString('bn-BD', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }); }, 1000);
+        };
+    </script>
+</body>
+</html>
