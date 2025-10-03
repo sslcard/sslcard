@@ -40,15 +40,20 @@
         .recent-transactions-list ul { list-style: none; max-height: 400px; overflow-y: auto; padding-right: 10px; } .recent-transactions-list li { display: flex; align-items: center; padding: 15px 5px; border-bottom: 1px solid var(--border-color); } .recent-transactions-list li:last-child { border-bottom: none; }
         .recent-transactions-list .tx-icon { width: 40px; height: 40px; border-radius: 50%; margin-right: 15px; display: flex; align-items: center; justify-content: center; background-color: var(--main-bg); }
         .recent-transactions-list .tx-details { flex-grow: 1; } .recent-transactions-list .tx-details .name { font-size: 15px; font-weight: 500; } .recent-transactions-list .tx-details .type { font-size: 13px; color: var(--text-light); }
+        .recent-transactions-list .tx-note { font-size: 12px; color: #8a93a2; font-style: italic; margin-top: 4px; }
         .recent-transactions-list .tx-amount { font-size: 15px; font-weight: 600; text-align: right; } .recent-transactions-list .tx-amount.income { color: var(--accent-green); } .recent-transactions-list .tx-amount.outcome { color: var(--accent-red); }
-        .view-all-tx a { color: var(--accent-primary); font-size: 14px; font-weight: 500; text-decoration: none; }
+        .view-all-tx a { color: var(--accent-primary); font-size: 14px; font-weight: 500; text-decoration: none; cursor: pointer; }
         .modal { display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(5px); animation: fadeIn 0.3s ease-in-out; }
         .modal-content { background-color: var(--card-bg); margin: auto; padding: 30px; border-radius: 16px; width: 100%; max-width: 520px; box-shadow: var(--shadow-lg); position: relative; border: 1px solid var(--border-color); }
+        .modal-content.modal-lg { max-width: 800px; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); } .modal-header h3 { margin: 0; font-size: 20px; color: var(--accent-primary); font-weight: 600; } .close-button { color: var(--text-light); font-size: 28px; font-weight: normal; cursor: pointer; background:none; border:none; line-height: 1; } .close-button:hover { color: var(--text-dark); }
         .form-group { margin-bottom: 20px; } .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-light); font-size: 14px; } .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 15px; font-family: 'Poppins', 'Hind Siliguri', sans-serif; background-color: var(--main-bg); color: var(--text-dark); } .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent-primary); outline: none; box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.3); }
         .form-group input[readonly] { background-color: #374151; cursor: not-allowed; }
         .submit-button { background-color: var(--accent-primary); color: #111827; padding: 12px 20px; border: none; border-radius: 25px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; transition: all 0.3s ease; } .submit-button:hover { background-color: #67E8F9; transform: translateY(-2px); }
         .emi-list { list-style: none; margin-top: 15px; } .emi-item { background-color: var(--main-bg); padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--border-color); } .emi-item-header { font-weight: 600; } .emi-item-details { font-size: 13px; color: var(--text-light); margin: 5px 0; }
+        #fullHistoryList { max-height: 50vh; overflow-y: auto; padding-right: 15px; }
+        .filter-controls { display: flex; gap: 15px; align-items: center; margin-bottom: 20px; }
+        .filter-controls .form-group { flex-grow: 1; margin-bottom: 0; }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         @media (max-width: 1200px) { .content-area { grid-template-columns: 1fr; } }
         @media (max-width: 992px) { .sidebar { width: 80px; } .main-content-wrapper { margin-left: 80px; } .sidebar-header .logo-text, .sidebar nav ul li a .nav-text { display: none; } .sidebar nav ul li a { justify-content: center; padding: 14px 0; } .income-expenses-row { grid-template-columns: 1fr; } }
@@ -69,7 +74,7 @@
                 <div class="middle-column">
                     <div class="card my-card-section"><div class="card-header"><h3>আমার কার্ড</h3><button class="action-button" onclick="openModal('addBalanceModal')">ব্যালেন্স যোগ/পেমেন্ট</button></div><div class="visa-card-display"><div class="card-top"><div class="chip"></div><span class="brand">VISA</span></div><div class="card-main-number" id="cardNumberObscured"></div><div class="card-bottom"><div><span>কার্ড হোল্ডার</span><span id="cardHolderNameDisplayCard"></span></div><div><span>বৈধতা শেষ</span><span id="cardExpiryDateDisplay"></span></div></div></div><div class="balance-details"><div class="total-balance-label">মোট ব্যবহারযোগ্য ব্যালেন্স (BDT)</div><div class="total-balance-amount" id="displayTotalBalance"></div><div class="balance-breakdown" id="balanceBreakdownDisplay"></div></div><div class="income-expenses-row"><div class="income"><div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/></svg></div><div class="text-details"><span class="label">মোট জমা (BDT)</span><span class="amount" id="displayIncome"></span></div></div><div class="expenses"><div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/></svg></div><div class="text-details"><span class="label">মোট খরচ (BDT)</span><span class="amount" id="displayExpenses"></span></div></div><div class="fees"><div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M4 4.5V1s0-.5.5-.5h7a.5.5 0 0 1 .5.5v3.5h-8Zm9 0V1a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v3.5h11Z"/><path d="M3.5 5a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-9ZM4 5.5h8v9H4v-9Z"/></svg></div><div class="text-details"><span class="label">মোট ফি (BDT)</span><span class="amount" id="displayFees"></span></div></div></div></div>
                     <div class="card"><div class="card-header"><h3>দ্রুত কার্যক্রম</h3></div><div class="actions-grid"><div class="action-item" onclick="openModal('transferModal')"><div class="action-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/><path d="M5 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 5 8zm0-2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm0 5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5z"/><path d="M2 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm0 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm0 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg></div><span class="action-name">ট্রান্সফার</span></div><div class="action-item" onclick="openModal('cashOutModal')"><div class="action-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M1 3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1H1zm12.135 1.334a.5.5 0 0 0-.453-.245H3.318a.5.5 0 0 0-.453.245L1.22 7.865A.5.5 0 0 0 1 8.135V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.135a.5.5 0 0 0-.22-.43L13.135 4.334zM2 12V8.5h12V12H2zM13.5 7h-11l.75-2.5h9.5L13.5 7z"/></svg></div><span class="action-name">ক্যাশ আউট</span></div><div class="action-item" onclick="openModal('rechargeModal')"><div class="action-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M5 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2H5zm0 2h6v1H5V3zm0 2h6v1H5V5zm0 2h6v1H5V7zm0 2h6v1H5V9zm0 2h6v1H5v-1z"/></svg></div><span class="action-name">রিচার্জ</span></div><div class="action-item" onclick="openModal('billPayModal')"><div class="action-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M1.5 0A1.5 1.5 0 0 0 0 1.5v13A1.5 1.5 0 0 0 1.5 16h13a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 14.5 0h-13zM1 1.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v13a.5.5 0 0 1-.5-.5h-13a.5.5 0 0 1-.5-.5v-13z"/><path d="M4 4h8v1H4V4zm0 2h8v1H4V6zm0 2h8v1H4V8zm0 2h3v1H4v-1zm0 2h3v1H4v-1zm5-6h3v1h-3V4zm0 2h3v1h-3V6zm0 2h3v1h-3V8z"/></svg></div><span class="action-name">বিল পে</span></div></div></div>
-                    <div class="card recent-transactions-list"><div class="card-header"><h3>সাম্প্রতিক লেনদেন</h3></div><ul id="recentTxList"></ul><div class="view-all-tx"><a href="#" id="loadMoreTxBtn">আরও দেখুন</a></div></div>
+                    <div class="card recent-transactions-list"><div class="card-header"><h3>সাম্প্রতিক লেনদেন</h3></div><ul id="recentTxList"></ul><div class="view-all-tx"><a onclick="openHistoryModal()">আরও দেখুন</a></div></div>
                 </div>
                 <div class="right-column">
                     <div class="card"><div class="card-header"><h3>ম্যানেজমেন্ট ও অন্যান্য</h3></div><div class="actions-grid"><div class="action-item" onclick="openModal('addBankFundsModal')"><div class="action-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M8.5 12.5a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v2zM2 11.5a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 0-1h-6a.5.5 0 0 0-.5.5zm2.5-6.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-2zM6 6.5a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 0-1h-6a.5.5 0 0 0-.5.5z"/><path d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V2zm1 0v12h14V2H1z"/></svg></div><span class="action-name">ব্যাংক ফান্ড</span></div><div class="action-item" onclick="openModal('addUserCashModal')"><div class="action-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M4 3.06h2.726c1.22 0 2.12.575 2.325 1.724H4v1.051h5.051C8.855 7.001 8 7.558 6.788 7.558H4v1.317L8.437 14h2.11L6.095 8.884h.855c2.316-.018 3.465-1.476 3.688-3.049H12V4.784h-1.345c-.08-.778-.357-1.335-.793-1.732H12V2H4v1.06z"/></svg></div><span class="action-name">ইউজার ক্যাশ</span></div><div class="action-item" onclick="openModal('takeLoanModal')"><div class="action-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M5 8.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm.5 2.42a.5.5 0 0 1 0-.84l3-1.733a.5.5 0 0 1 .5.84l-3 1.733a.5.5 0 0 1-.5 0z"/><path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10 0H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/></svg></div><span class="action-name">লোন নিন</span></div><div class="action-item" onclick="openModal('emiPurchaseModal')"><div class="action-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v1h14V4a1 1 0 0 0-1-1H2zm13 4H1v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7z"/><path d="M2 10a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-1z"/></svg></div><span class="action-name">EMI-তে কিনুন</span></div></div></div>
@@ -85,52 +90,67 @@
     <div id="addBankFundsModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>ব্যাংক ফান্ড যোগ করুন</h3><button class="close-button" onclick="closeModal('addBankFundsModal')">&times;</button></div><div class="form-group"><label for="addBankAmount">টাকার পরিমাণ (BDT):</label><input type="number" id="addBankAmount" placeholder="পরিমাণ লিখুন"></div><button class="submit-button" onclick="addBankFunds()">যোগ করুন</button></div></div>
     <div id="addUserCashModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>ব্যক্তিগত ক্যাশ জমা দিন</h3><button class="close-button" onclick="closeModal('addUserCashModal')">&times;</button></div><div class="form-group"><label for="paymentMethod">পেমেন্ট মাধ্যম:</label><select id="paymentMethod"><option value="bKash">বিকাশ</option><option value="Nagad">নগদ</option><option value="Rocket">রকেট</option><option value="Upay">উপায়</option><option value="Other">অন্যান্য</option></select></div><div class="form-group"><label for="addUserAmount">টাকার পরিমাণ (BDT):</label><input type="number" id="addUserAmount" placeholder="পরিমাণ লিখুন"></div><button class="submit-button" onclick="addUserCash()">জমা দিন</button></div></div>
     <div id="takeLoanModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>কিস্তিতে লোন নিন</h3><button class="close-button" onclick="closeModal('takeLoanModal')">&times;</button></div><div class="form-group"><label for="loanAmount">লোনের পরিমাণ (BDT):</label><input type="number" id="loanAmount" placeholder="পরিমাণ লিখুন"></div><div class="form-group"><label for="loanInstallments">কিস্তির সংখ্যা (মাস):</label><select id="loanInstallments"><option value="3">৩ মাস</option><option value="6">৬ মাস</option><option value="12">১২ মাস</option></select></div><button class="submit-button" onclick="takeLoan()">লোন নিন</button></div></div>
-    <div id="transferModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>অর্থ পাঠান</h3><button class="close-button" onclick="closeModal('transferModal')">&times;</button></div><div class="form-group"><label for="transferTo">প্রাপকের অ্যাকাউন্ট/মোবাইল নম্বর:</label><input type="text" id="transferTo" placeholder="নম্বর লিখুন"></div><div class="form-group"><label for="transferAmount">টাকার পরিমাণ:</label><input type="number" id="transferAmount" placeholder="পরিমাণ লিখুন"></div><button class="submit-button" onclick="transferMoney()">পাঠান</button></div></div>
-    <div id="cashOutModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>ক্যাশ আউট</h3><button class="close-button" onclick="closeModal('cashOutModal')">&times;</button></div><div class="form-group"><label for="cashOutMethod">মাধ্যম:</label><select id="cashOutMethod" onchange="updateCashOutFee()"><option value="bkash">বিকাশ</option><option value="nagad">নগদ</option><option value="rocket">রকেট</option><option value="upay">উপায়</option><option value="dbbl">ডাচ-বাংলা</option><option value="atm">এটিএম</option></select></div><div class="form-group"><label for="cashOutAmount">টাকার পরিমাণ:</label><input type="number" id="cashOutAmount" placeholder="পরিমাণ লিখুন" oninput="updateCashOutFee()"></div><div class="form-group"><label for="cashOutFee">ফি:</label><input type="text" id="cashOutFee" readonly></div><button class="submit-button" onclick="cashOut()">ক্যাশ আউট করুন</button></div></div>
-    <div id="rechargeModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>মোবাইল রিচার্জ</h3><button class="close-button" onclick="closeModal('rechargeModal')">&times;</button></div><div class="form-group"><label for="rechargeNumber">মোবাইল নম্বর:</label><input type="text" id="rechargeNumber" placeholder="নম্বর লিখুন"></div><div class="form-group"><label for="rechargeAmount">টাকার পরিমাণ:</label><input type="number" id="rechargeAmount" placeholder="পরিমাণ লিখুন"></div><button class="submit-button" onclick="mobileRecharge()">রিচার্জ করুন</button></div></div>
-    <div id="billPayModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>বিল পে</h3><button class="close-button" onclick="closeModal('billPayModal')">&times;</button></div><div class="form-group"><label for="billType">বিলের ধরন:</label><input type="text" id="billType" placeholder="যেমন: বিদ্যুৎ, গ্যাস"></div><div class="form-group"><label for="billAmount">টাকার পরিমাণ:</label><input type="number" id="billAmount" placeholder="পরিমাণ লিখুন"></div><button class="submit-button" onclick="payBill()">বিল দিন</button></div></div>
+    <div id="transferModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>অর্থ পাঠান</h3><button class="close-button" onclick="closeModal('transferModal')">&times;</button></div><div class="form-group"><label for="transferTo">প্রাপকের অ্যাকাউন্ট/মোবাইল নম্বর:</label><input type="text" id="transferTo" placeholder="নম্বর লিখুন"></div><div class="form-group"><label for="transferAmount">টাকার পরিমাণ:</label><input type="number" id="transferAmount" placeholder="পরিমাণ লিখুন"></div><div class="form-group"><label for="transferNotes">নোট (ঐচ্ছিক):</label><textarea id="transferNotes" rows="2" placeholder="কেন টাকা পাঠাচ্ছেন?"></textarea></div><button class="submit-button" onclick="transferMoney()">পাঠান</button></div></div>
+    <div id="cashOutModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>ক্যাশ আউট</h3><button class="close-button" onclick="closeModal('cashOutModal')">&times;</button></div><div class="form-group"><label for="cashOutMethod">মাধ্যম:</label><select id="cashOutMethod" onchange="updateCashOutFee()"><option value="bkash">বিকাশ</option><option value="nagad">নগদ</option><option value="rocket">রকেট</option><option value="upay">উপায়</option><option value="dbbl">ডাচ-বাংলা</option><option value="atm">এটিএম</option></select></div><div class="form-group"><label for="cashOutAmount">টাকার পরিমাণ:</label><input type="number" id="cashOutAmount" placeholder="পরিমাণ লিখুন" oninput="updateCashOutFee()"></div><div class="form-group"><label for="cashOutFee">ফি:</label><input type="text" id="cashOutFee" readonly></div><div class="form-group"><label for="cashOutNotes">নোট (ঐচ্ছিক):</label><textarea id="cashOutNotes" rows="2" placeholder="খরচের কারণ"></textarea></div><button class="submit-button" onclick="cashOut()">ক্যাশ আউট করুন</button></div></div>
+    <div id="rechargeModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>মোবাইল রিচার্জ</h3><button class="close-button" onclick="closeModal('rechargeModal')">&times;</button></div><div class="form-group"><label for="rechargeNumber">মোবাইল নম্বর:</label><input type="text" id="rechargeNumber" placeholder="নম্বর লিখুন"></div><div class="form-group"><label for="rechargeAmount">টাকার পরিমাণ:</label><input type="number" id="rechargeAmount" placeholder="পরিমাণ লিখুন"></div><div class="form-group"><label for="rechargeNotes">নোট (ঐচ্ছিক):</label><textarea id="rechargeNotes" rows="2" placeholder="কার জন্য রিচার্জ?"></textarea></div><button class="submit-button" onclick="mobileRecharge()">রিচার্জ করুন</button></div></div>
+    <div id="billPayModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>বিল পে</h3><button class="close-button" onclick="closeModal('billPayModal')">&times;</button></div><div class="form-group"><label for="billType">বিলের ধরন:</label><input type="text" id="billType" placeholder="যেমন: বিদ্যুৎ, গ্যাস"></div><div class="form-group"><label for="billAmount">টাকার পরিমাণ:</label><input type="number" id="billAmount" placeholder="পরিমাণ লিখুন"></div><div class="form-group"><label for="billNotes">নোট (ঐচ্ছিক):</label><textarea id="billNotes" rows="2" placeholder="কোন মাসের বিল?"></textarea></div><button class="submit-button" onclick="payBill()">বিল দিন</button></div></div>
     <div id="emiPurchaseModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>EMI-তে কিনুন</h3><button class="close-button" onclick="closeModal('emiPurchaseModal')">&times;</button></div><div class="form-group"><label for="emiProduct">পণ্যের নাম:</label><input type="text" id="emiProduct" placeholder="পণ্যের নাম লিখুন"></div><div class="form-group"><label for="emiAmount">পণ্যের মোট মূল্য:</label><input type="number" id="emiAmount" placeholder="মূল্য লিখুন"></div><div class="form-group"><label for="emiInstallments">কিস্তির সংখ্যা (মাস):</label><select id="emiInstallments"><option value="3">৩ মাস</option><option value="6">৬ মাস</option><option value="12">১২ মাস</option></select></div><div class="form-group"><label for="emiNotes">নোট (ঐচ্ছিক):</label><textarea id="emiNotes" rows="3" placeholder="ফেরত বা ওয়ারেন্টি সংক্রান্ত তথ্য..."></textarea></div><button class="submit-button" onclick="processEmiPurchase()">ক্রয় করুন</button></div></div>
     
+    <div id="payInstallmentModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 id="installmentModalTitle">কিস্তি পরিশোধ করুন</h3><button class="close-button" onclick="closeModal('payInstallmentModal')">&times;</button></div><div class="form-group"><label>বকেয়া পরিমাণ:</label><input type="text" id="installmentRemainingAmount" readonly></div><div class="form-group"><label for="installmentAmount">পরিশোধের পরিমাণ (আপনার ইচ্ছা অনুযায়ী):</label><input type="number" id="installmentAmount" placeholder="পরিমাণ লিখুন"></div><input type="hidden" id="installmentType"><input type="hidden" id="installmentIndex"><button class="submit-button" onclick="processCustomInstallment()">পরিশোধ নিশ্চিত করুন</button></div></div>
+
+    <!-- লেনদেন বিবরণীর জন্য নতুন মডাল -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>সম্পূর্ণ লেনদেন বিবরণী</h3>
+                <button class="close-button" onclick="closeModal('historyModal')">&times;</button>
+            </div>
+            <div class="filter-controls">
+                <div class="form-group"><label for="startDate">শুরুর তারিখ:</label><input type="date" id="startDate"></div>
+                <div class="form-group"><label for="endDate">শেষ তারিখ:</label><input type="date" id="endDate"></div>
+                <button class="action-button" onclick="renderFullHistory()">ফিল্টার</button>
+            </div>
+            <ul id="fullHistoryList" class="recent-transactions-list"></ul>
+        </div>
+    </div>
+
     <script>
         // --- গ্লোবাল ভ্যারিয়েবল ও কনস্ট্যান্ট ---
         let userBalance, bankBalance, reserveFund, currentIncome, currentExpenses, currentFees, transactions, loanDetails, emiPurchases;
         const cashOutCharges = { bkash: 0.0185, nagad: 0.0145, rocket: 0.018, upay: 0.01, dbbl: 0.018, atm: 9 };
         
-        // --- পেশাদার স্ট্যাটাস বার্তা ফাংশন (SweetAlert2) ---
         function showStatus(title, text, icon = 'success') {
             Swal.fire({ title, text, icon, confirmButtonText: 'ঠিক আছে', background: 'var(--card-bg)', color: 'var(--text-dark)' });
         }
 
-        // --- Local Storage ফাংশন ---
         function loadDataFromLocalStorage() {
-            userBalance = parseFloat(localStorage.getItem('userBalance_v16')) || 0.00;
-            bankBalance = parseFloat(localStorage.getItem('bankBalance_v16')) || 0.00;
-            reserveFund = parseFloat(localStorage.getItem('reserveFund_v16')) || 0.00;
-            currentIncome = parseFloat(localStorage.getItem('currentIncome_v16')) || 0.00;
-            currentExpenses = parseFloat(localStorage.getItem('currentExpenses_v16')) || 0.00;
-            currentFees = parseFloat(localStorage.getItem('currentFees_v16')) || 0.00;
-            transactions = JSON.parse(localStorage.getItem('transactions_v16')) || [];
-            loanDetails = JSON.parse(localStorage.getItem('loanDetails_v16')) || null;
-            emiPurchases = JSON.parse(localStorage.getItem('emiPurchases_v16')) || [];
+            userBalance = parseFloat(localStorage.getItem('userBalance_v18')) || 0.00;
+            bankBalance = parseFloat(localStorage.getItem('bankBalance_v18')) || 0.00;
+            reserveFund = parseFloat(localStorage.getItem('reserveFund_v18')) || 0.00;
+            currentIncome = parseFloat(localStorage.getItem('currentIncome_v18')) || 0.00;
+            currentExpenses = parseFloat(localStorage.getItem('currentExpenses_v18')) || 0.00;
+            currentFees = parseFloat(localStorage.getItem('currentFees_v18')) || 0.00;
+            transactions = JSON.parse(localStorage.getItem('transactions_v18')) || [];
+            loanDetails = JSON.parse(localStorage.getItem('loanDetails_v18')) || null;
+            emiPurchases = JSON.parse(localStorage.getItem('emiPurchases_v18')) || [];
         }
         function saveDataToLocalStorage() {
-            localStorage.setItem('userBalance_v16', userBalance.toFixed(2));
-            localStorage.setItem('bankBalance_v16', bankBalance.toFixed(2));
-            localStorage.setItem('reserveFund_v16', reserveFund.toFixed(2));
-            localStorage.setItem('currentIncome_v16', currentIncome.toFixed(2));
-            localStorage.setItem('currentExpenses_v16', currentExpenses.toFixed(2));
-            localStorage.setItem('currentFees_v16', currentFees.toFixed(2));
-            localStorage.setItem('transactions_v16', JSON.stringify(transactions));
-            localStorage.setItem('loanDetails_v16', JSON.stringify(loanDetails));
-            localStorage.setItem('emiPurchases_v16', JSON.stringify(emiPurchases));
+            localStorage.setItem('userBalance_v18', userBalance.toFixed(2));
+            localStorage.setItem('bankBalance_v18', bankBalance.toFixed(2));
+            localStorage.setItem('reserveFund_v18', reserveFund.toFixed(2));
+            localStorage.setItem('currentIncome_v18', currentIncome.toFixed(2));
+            localStorage.setItem('currentExpenses_v18', currentExpenses.toFixed(2));
+            localStorage.setItem('currentFees_v18', currentFees.toFixed(2));
+            localStorage.setItem('transactions_v18', JSON.stringify(transactions));
+            localStorage.setItem('loanDetails_v18', JSON.stringify(loanDetails));
+            localStorage.setItem('emiPurchases_v18', JSON.stringify(emiPurchases));
         }
         
-        // --- UI আপডেট ও সেটআপ ফাংশন ---
         function formatCurrency(amount) { return `৳${parseFloat(amount).toLocaleString('bn-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; }
         function updateUIData() {
             const totalBalance = userBalance + bankBalance;
             document.getElementById('displayTotalBalance').textContent = formatCurrency(totalBalance);
-            document.getElementById('balanceBreakdownDisplay').textContent = `(ব্যক্তিগত: ${formatCurrency(userBalance)} + ব্যাংক: ${formatCurrency(bankBalance)}) | রিজার্ভ ফান্ড: ${formatCurrency(reserveFund)}`;
+            document.getElementById('balanceBreakdownDisplay').textContent = `(ব্যক্তিগত: ${formatCurrency(userBalance)} + ব্যাংক: ${formatCurrency(bankBalance)}) | রিজার্ভ: ${formatCurrency(reserveFund)}`;
             document.getElementById('displayIncome').textContent = formatCurrency(currentIncome);
             document.getElementById('displayExpenses').textContent = formatCurrency(currentExpenses);
             document.getElementById('displayFees').textContent = formatCurrency(currentFees);
@@ -138,11 +158,9 @@
             const loanInfoEl = document.getElementById('loanInfoDisplay');
             const loanCardEl = document.getElementById('loan-info-card');
             if (loanDetails) {
-                loanInfoEl.innerHTML = `বকেয়া লোন: ${formatCurrency(loanDetails.remainingLoan)}<br>মাসিক কিস্তি: ${formatCurrency(loanDetails.monthlyPayment)}<br><button class="action-button" style="margin-top: 10px;" onclick="payLoanInstallment()">কিস্তি পরিশোধ করুন</button>`;
+                loanInfoEl.innerHTML = `বকেয়া লোন: ${formatCurrency(loanDetails.remainingLoan)}<br>মাসিক কিস্তি: ${formatCurrency(loanDetails.monthlyPayment)}<br><button class="action-button" style="margin-top: 10px;" onclick="openPayInstallmentModal('loan')">কিস্তি পরিশোধ</button>`;
                 loanCardEl.style.display = 'block';
-            } else {
-                loanCardEl.style.display = 'none';
-            }
+            } else { loanCardEl.style.display = 'none'; }
 
             const emiListEl = document.getElementById('emiList');
             const emiCardEl = document.getElementById('emi-info-card');
@@ -151,124 +169,124 @@
                     <li class="emi-item">
                         <div class="emi-item-header">${emi.productName}</div>
                         <div class="emi-item-details">বাকি আছে: ${formatCurrency(emi.remainingAmount)} | মাসিক কিস্তি: ${formatCurrency(emi.monthlyPayment)}</div>
-                        <button class="action-button" style="margin-top: 10px;" onclick="payEmiInstallment(${index})">কিস্তি দিন</button>
+                        <button class="action-button" style="margin-top: 10px;" onclick="openPayInstallmentModal('emi', ${index})">কিস্তি দিন</button>
                     </li>
                 `).join('');
                 emiCardEl.style.display = 'block';
-            } else {
-                emiCardEl.style.display = 'none';
-            }
-
-            renderTransactions();
-            saveDataToLocalStorage();
+            } else { emiCardEl.style.display = 'none'; }
+            renderTransactions(); saveDataToLocalStorage();
         }
         
-        // --- ব্যাংক, ইউজার, লোন ও EMI ফাংশন ---
         function addBankFunds() { const amount = parseFloat(document.getElementById('addBankAmount').value); if (isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক পরিমাণ লিখুন।', 'error'); return; } bankBalance += amount; currentIncome += amount; addTransaction('ব্যাংক ফান্ড', 'ব্যাংক থেকে ফান্ড প্রাপ্তি', amount, 'income'); closeModal('addBankFundsModal'); showStatus('সফল', `${formatCurrency(amount)} ব্যাংক ফান্ড হিসেবে যোগ হয়েছে।`); updateUIData(); }
         function addUserCash() { const amount = parseFloat(document.getElementById('addUserAmount').value); const method = document.getElementById('paymentMethod').value; if (isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক পরিমাণ লিখুন।', 'error'); return; } userBalance += amount; currentIncome += amount; addTransaction('ব্যক্তিগত ক্যাশ', `${method} দিয়ে জমা`, amount, 'income'); closeModal('addUserCashModal'); showStatus('সফল', `${formatCurrency(amount)} ব্যক্তিগত ক্যাশ হিসেবে যোগ হয়েছে।`); updateUIData(); }
+        function takeLoan() { const amount = parseFloat(document.getElementById('loanAmount').value); const installments = parseInt(document.getElementById('loanInstallments').value); if (isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক পরিমাণ লিখুন।', 'error'); return; } if (loanDetails) { showStatus('ত্রুটি', 'আপনার ইতিমধ্যে একটি লোন চলমান আছে।', 'error'); return; } if (processFinancialTransaction(amount, 'লোন গ্রহণ', `${installments} মাসের কিস্তিতে লোন`)) { reserveFund += amount; loanDetails = { totalLoan: amount, remainingLoan: amount, installments: installments, monthlyPayment: amount / installments }; addTransaction('রিজার্ভ ফান্ড', 'লোনের জন্য ফান্ড লক', amount, 'outcome', 'সিস্টেম দ্বারা লোন অনুমোদিত'); closeModal('takeLoanModal'); showStatus('লোন সফল', `${formatCurrency(amount)} লোন প্রক্রিয়া সফল হয়েছে।`); updateUIData(); } }
+        function processEmiPurchase() { const product = document.getElementById('emiProduct').value; const amount = parseFloat(document.getElementById('emiAmount').value); const installments = parseInt(document.getElementById('emiInstallments').value); const notes = document.getElementById('emiNotes').value; if (!product || isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক তথ্য দিন।', 'error'); return; } if (processFinancialTransaction(amount, 'EMI ক্রয়', product)) { reserveFund += amount; const emi = { id: Date.now(), productName: product, totalAmount: amount, remainingAmount: amount, installments: installments, monthlyPayment: amount / installments, notes: notes }; emiPurchases.push(emi); addTransaction('রিজার্ভ ফান্ড', `${product}-এর জন্য ফান্ড লক`, amount, 'outcome', notes); closeModal('emiPurchaseModal'); showStatus('সফল', `${product}-এর জন্য ${formatCurrency(amount)} EMI ক্রয় সফল।`); updateUIData(); } }
         
-        function takeLoan() { 
-            const amount = parseFloat(document.getElementById('loanAmount').value); 
-            const installments = parseInt(document.getElementById('loanInstallments').value); 
-            if (isNaN(amount) || amount <= 0) { 
-                showStatus('ত্রুটি', 'সঠিক পরিমাণ লিখুন।', 'error'); 
-                return; 
-            } 
-            if (loanDetails) { 
-                showStatus('ত্রুটি', 'আপনার ইতিমধ্যে একটি লোন চলমান আছে।', 'error'); 
-                return; 
+        function openPayInstallmentModal(type, index = null) {
+            document.getElementById('installmentType').value = type;
+            const amountInput = document.getElementById('installmentAmount');
+            if (type === 'loan' && loanDetails) {
+                document.getElementById('installmentModalTitle').textContent = 'লোনের কিস্তি পরিশোধ';
+                document.getElementById('installmentRemainingAmount').value = formatCurrency(loanDetails.remainingLoan);
+                amountInput.placeholder = `মাসিক কিস্তি: ${formatCurrency(loanDetails.monthlyPayment)}`; amountInput.value = '';
+            } else if (type === 'emi' && emiPurchases[index]) {
+                const emi = emiPurchases[index];
+                document.getElementById('installmentIndex').value = index;
+                document.getElementById('installmentModalTitle').textContent = `${emi.productName}-এর কিস্তি পরিশোধ`;
+                document.getElementById('installmentRemainingAmount').value = formatCurrency(emi.remainingAmount);
+                amountInput.placeholder = `মাসিক কিস্তি: ${formatCurrency(emi.monthlyPayment)}`; amountInput.value = '';
             }
-            if (processFinancialTransaction(amount, 'লোন গ্রহণ', `${installments} মাসের কিস্তিতে লোন`)) {
-                reserveFund += amount; // টাকা রিজার্ভ ফান্ডে যোগ হবে
-                loanDetails = { totalLoan: amount, remainingLoan: amount, installments: installments, monthlyPayment: amount / installments }; 
-                addTransaction('রিজার্ভ ফান্ড', 'লোনের জন্য ফান্ড লক', amount, 'outcome');
-                closeModal('takeLoanModal'); 
-                showStatus('লোন সফল', `${formatCurrency(amount)} লোন প্রক্রিয়া সফল হয়েছে এবং টাকা রিজার্ভ ফান্ডে যোগ হয়েছে।`); 
-                updateUIData();
-            }
+            openModal('payInstallmentModal');
         }
 
-        function payLoanInstallment() { 
-            if (!loanDetails) return; 
-            const payment = loanDetails.monthlyPayment; 
-            
-            userBalance += payment; // টাকা রিজার্ভ থেকে মূল ব্যালেন্সে ফেরত আসবে
-            reserveFund -= payment;
-            currentIncome += payment; // এটিকে আয় হিসেবে দেখানো হলো কারণ মূল ব্যালেন্স বাড়ছে
-            loanDetails.remainingLoan -= payment; 
-            
-            addTransaction('লোন পরিশোধ', 'রিজার্ভ থেকে ফেরত', payment, 'income'); 
-
-            if (loanDetails.remainingLoan < 1) { 
-                loanDetails = null; 
-                showStatus('সফল', 'আপনার লোনটি সম্পূর্ণরূপে পরিশোধ করা হয়েছে।'); 
-            } else { 
-                showStatus('সফল', `${formatCurrency(payment)} কিস্তি পরিশোধ করা হয়েছে। টাকা মূল ব্যালেন্সে ফেরত এসেছে।`); 
-            } 
-            updateUIData(); 
+        function processCustomInstallment() {
+            const amount = parseFloat(document.getElementById('installmentAmount').value);
+            const type = document.getElementById('installmentType').value;
+            const index = document.getElementById('installmentIndex').value;
+            if (isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'দয়া করে একটি সঠিক পরিমাণ লিখুন।', 'error'); return; }
+            if (type === 'loan') { if (amount > loanDetails.remainingLoan) { showStatus('ত্রুটি', `আপনি বকেয়া ${formatCurrency(loanDetails.remainingLoan)} টাকার বেশি পরিশোধ করতে পারবেন না।`, 'error'); return; } payLoanInstallment(amount);
+            } else if (type === 'emi') { const emi = emiPurchases[parseInt(index)]; if (amount > emi.remainingAmount) { showStatus('ত্রুটি', `আপনি বকেয়া ${formatCurrency(emi.remainingAmount)} টাকার বেশি পরিশোধ করতে পারবেন না।`, 'error'); return; } payEmiInstallment(parseInt(index), amount); }
+            closeModal('payInstallmentModal');
         }
 
-        function processEmiPurchase() { 
-            const product = document.getElementById('emiProduct').value; 
-            const amount = parseFloat(document.getElementById('emiAmount').value); 
-            const installments = parseInt(document.getElementById('emiInstallments').value); 
-            const notes = document.getElementById('emiNotes').value; 
-            if (!product || isNaN(amount) || amount <= 0) { 
-                showStatus('ত্রুটি', 'সঠিক তথ্য দিন।', 'error'); 
-                return; 
-            } 
-            if (processFinancialTransaction(amount, 'EMI ক্রয়', product)) { 
-                reserveFund += amount; // টাকা রিজার্ভ ফান্ডে যোগ হবে
-                const emi = { id: Date.now(), productName: product, totalAmount: amount, remainingAmount: amount, installments: installments, monthlyPayment: amount / installments, notes: notes }; 
-                emiPurchases.push(emi); 
-                addTransaction('রিজার্ভ ফান্ড', `${product}-এর জন্য ফান্ড লক`, amount, 'outcome');
-                closeModal('emiPurchaseModal'); 
-                showStatus('সফল', `${product}-এর জন্য ${formatCurrency(amount)} EMI ক্রয় সফল হয়েছে।`); 
-                updateUIData(); 
-            } 
-        }
+        function payLoanInstallment(paymentAmount) { if (!loanDetails) return; userBalance += paymentAmount; reserveFund -= paymentAmount; currentIncome += paymentAmount; loanDetails.remainingLoan -= paymentAmount; addTransaction('লোন পরিশোধ', 'রিজার্ভ থেকে ফেরত', paymentAmount, 'income'); if (loanDetails.remainingLoan < 1) { loanDetails = null; showStatus('সফল', 'আপনার লোনটি সম্পূর্ণরূপে পরিশোধ করা হয়েছে।'); } else { showStatus('সফল', `${formatCurrency(paymentAmount)} পরিশোধ করা হয়েছে।`); } updateUIData(); }
+        function payEmiInstallment(index, paymentAmount) { const emi = emiPurchases[index]; if (!emi) return; userBalance += paymentAmount; reserveFund -= paymentAmount; currentIncome += paymentAmount; emi.remainingAmount -= paymentAmount; addTransaction('EMI পরিশোধ', `${emi.productName}-এর কিস্তি ফেরত`, paymentAmount, 'income'); if (emi.remainingAmount < 1) { emiPurchases.splice(index, 1); showStatus('সফল', `${emi.productName}-এর EMI সম্পূর্ণরূপে পরিশোধ করা হয়েছে।`); } else { showStatus('সফল', `${formatCurrency(paymentAmount)} কিস্তি পরিশোধ করা হয়েছে।`); } updateUIData(); }
 
-        function payEmiInstallment(index) { 
-            const emi = emiPurchases[index]; 
-            if (!emi) return; 
-            const payment = emi.monthlyPayment; 
-            
-            userBalance += payment; // টাকা রিজার্ভ থেকে মূল ব্যালেন্সে ফেরত আসবে
-            reserveFund -= payment;
-            currentIncome += payment;
-            emi.remainingAmount -= payment; 
-            
-            addTransaction('EMI পরিশোধ', `${emi.productName}-এর কিস্তি ফেরত`, payment, 'income'); 
-
-            if (emi.remainingAmount < 1) { 
-                emiPurchases.splice(index, 1); 
-                showStatus('সফল', `${emi.productName}-এর EMI সম্পূর্ণরূপে পরিশোধ করা হয়েছে।`); 
-            } else { 
-                showStatus('সফল', `${formatCurrency(payment)} কিস্তি পরিশোধ করা হয়েছে এবং টাকা মূল ব্যালেন্সে ফেরত এসেছে।`); 
-            } 
-            updateUIData(); 
-        }
-
-        // --- আর্থিক লেনদেন ফাংশন ---
         function addBalance() { const amount = parseFloat(document.getElementById('addAmount').value); if (isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক পরিমাণ লিখুন।', 'error'); return; } userBalance += amount; currentIncome += amount; addTransaction('ব্যালেন্স পেমেন্ট', 'পেমেন্ট করা হয়েছে', amount, 'income'); closeModal('addBalanceModal'); showStatus('পেমেন্ট সফল', `${formatCurrency(amount)} পেমেন্ট সফল হয়েছে।`); updateUIData(); }
-        function processFinancialTransaction(amount, type, description, fee = 0) { const totalCost = amount + fee; const totalAvailable = userBalance + bankBalance; if (totalCost > totalAvailable) { showStatus('অপর্যাপ্ত ব্যালেন্স', `আপনার মোট ব্যালেন্স ${formatCurrency(totalAvailable)}। প্রয়োজন ${formatCurrency(totalCost)}`, 'error'); return false; } let deductedFromUser = Math.min(totalCost, userBalance); userBalance -= deductedFromUser; let remainingToDeduct = totalCost - deductedFromUser; bankBalance -= remainingToDeduct; currentExpenses += amount; currentFees += fee; addTransaction(type, description, amount, 'outcome'); if (fee > 0) addTransaction('ফি', `${type} চার্জ`, fee, 'outcome'); return true; }
-        function transferMoney() { const recipient = document.getElementById('transferTo').value.trim(); const amount = parseFloat(document.getElementById('transferAmount').value); if (!recipient || isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক তথ্য দিন।', 'error'); return; } if (processFinancialTransaction(amount, 'ট্রান্সফার', `প্রেরিত: ${recipient}`)) { showStatus('ট্রান্সফার সফল', `${formatCurrency(amount)} সফলভাবে ${recipient}-কে পাঠানো হয়েছে।`); closeModal('transferModal'); updateUIData(); } }
-        function mobileRecharge() { const number = document.getElementById('rechargeNumber').value.trim(); const amount = parseFloat(document.getElementById('rechargeAmount').value); if (!number || isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক তথ্য দিন।', 'error'); return; } if (processFinancialTransaction(amount, 'মোবাইল রিচার্জ', `নম্বর: ${number}`)) { showStatus('রিচার্জ সফল', `${formatCurrency(amount)} সফলভাবে ${number}-এ রিচার্জ হয়েছে।`); closeModal('rechargeModal'); updateUIData(); } }
-        function payBill() { const type = document.getElementById('billType').value.trim(); const amount = parseFloat(document.getElementById('billAmount').value); if (!type || isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক তথ্য দিন।', 'error'); return; } if (processFinancialTransaction(amount, 'বিল পে', `বিলের ধরন: ${type}`)) { showStatus('বিল পরিশোধিত', `${formatCurrency(amount)} টাকার ${type} বিল পরিশোধ করা হয়েছে।`); closeModal('billPayModal'); updateUIData(); } }
+        function processFinancialTransaction(amount, type, description, fee = 0, notes = '') { const totalCost = amount + fee; const totalAvailable = userBalance + bankBalance; if (totalCost > totalAvailable) { showStatus('অপর্যাপ্ত ব্যালেন্স', `আপনার মোট ব্যালেন্স ${formatCurrency(totalAvailable)}। প্রয়োজন ${formatCurrency(totalCost)}`, 'error'); return false; } let deductedFromUser = Math.min(totalCost, userBalance); userBalance -= deductedFromUser; let remainingToDeduct = totalCost - deductedFromUser; bankBalance -= remainingToDeduct; currentExpenses += amount; currentFees += fee; addTransaction(type, description, amount, 'outcome', notes); if (fee > 0) addTransaction('ফি', `${type} চার্জ`, fee, 'outcome'); return true; }
+        function transferMoney() { const recipient = document.getElementById('transferTo').value.trim(); const amount = parseFloat(document.getElementById('transferAmount').value); const notes = document.getElementById('transferNotes').value.trim(); if (!recipient || isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক তথ্য দিন।', 'error'); return; } if (processFinancialTransaction(amount, 'ট্রান্সফার', `প্রেরিত: ${recipient}`, 0, notes)) { showStatus('ট্রান্সফার সফল', `${formatCurrency(amount)} সফলভাবে ${recipient}-কে পাঠানো হয়েছে।`); closeModal('transferModal'); updateUIData(); } }
+        function mobileRecharge() { const number = document.getElementById('rechargeNumber').value.trim(); const amount = parseFloat(document.getElementById('rechargeAmount').value); const notes = document.getElementById('rechargeNotes').value.trim(); if (!number || isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক তথ্য দিন।', 'error'); return; } if (processFinancialTransaction(amount, 'মোবাইল রিচার্জ', `নম্বর: ${number}`, 0, notes)) { showStatus('রিচার্জ সফল', `${formatCurrency(amount)} সফলভাবে ${number}-এ রিচার্জ হয়েছে।`); closeModal('rechargeModal'); updateUIData(); } }
+        function payBill() { const type = document.getElementById('billType').value.trim(); const amount = parseFloat(document.getElementById('billAmount').value); const notes = document.getElementById('billNotes').value.trim(); if (!type || isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক তথ্য দিন।', 'error'); return; } if (processFinancialTransaction(amount, 'বিল পে', `বিলের ধরন: ${type}`, 0, notes)) { showStatus('বিল পরিশোধিত', `${formatCurrency(amount)} টাকার ${type} বিল পরিশোধ করা হয়েছে।`); closeModal('billPayModal'); updateUIData(); } }
         function updateCashOutFee() { const amount = parseFloat(document.getElementById('cashOutAmount').value) || 0; const method = document.getElementById('cashOutMethod').value; let fee = 0; if (amount > 0) { if (method === 'atm') { fee = cashOutCharges.atm; } else { fee = amount * cashOutCharges[method]; } } document.getElementById('cashOutFee').value = formatCurrency(fee); }
-        function cashOut() { const amount = parseFloat(document.getElementById('cashOutAmount').value); const method = document.getElementById('cashOutMethod').value; if (isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক পরিমাণ লিখুন।', 'error'); return; } const fee = parseFloat(document.getElementById('cashOutFee').value.replace('৳', '').replace(/,/g, '')); if (processFinancialTransaction(amount, 'ক্যাশ আউট', `মাধ্যম: ${method.toUpperCase()}`, fee)) { showStatus('ক্যাশ আউট সফল', `${formatCurrency(amount)} ক্যাশ আউট হয়েছে। ফি: ${formatCurrency(fee)}`); closeModal('cashOutModal'); updateUIData(); } }
+        function cashOut() { const amount = parseFloat(document.getElementById('cashOutAmount').value); const method = document.getElementById('cashOutMethod').value; const notes = document.getElementById('cashOutNotes').value.trim(); if (isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক পরিমাণ লিখুন।', 'error'); return; } const fee = parseFloat(document.getElementById('cashOutFee').value.replace('৳', '').replace(/,/g, '')); if (processFinancialTransaction(amount, 'ক্যাশ আউট', `মাধ্যম: ${method.toUpperCase()}`, fee, notes)) { showStatus('ক্যাশ আউট সফল', `${formatCurrency(amount)} ক্যাশ আউট হয়েছে। ফি: ${formatCurrency(fee)}`); closeModal('cashOutModal'); updateUIData(); } }
 
-        function addTransaction(type, description, amount, status) { const newTx = { date: new Date().toLocaleDateString('bn-BD'), brand: type, type: description, amount: amount, status: status }; transactions.unshift(newTx); if (transactions.length > 100) transactions.pop(); }
-        function renderTransactions() { const listEl = document.getElementById('recentTxList'); listEl.innerHTML = ''; const toShow = transactions.slice(0, 5); if (toShow.length === 0) { listEl.innerHTML = '<li><center style="padding: 20px; color: var(--text-light);"><i>কোনো লেনদেন পাওয়া যায়নি।</i></center></li>'; return; } toShow.forEach(tx => { const li = document.createElement('li'); const icon = tx.status === 'income' ? '📥' : '📤'; li.innerHTML = `<div class="tx-icon">${icon}</div><div class="tx-details"><div class="name">${tx.brand}</div><div class="type">${tx.type}</div></div><div class="tx-amount ${tx.status}">${tx.status === 'income' ? '+' : '-'} ${formatCurrency(tx.amount)}</div>`; listEl.appendChild(li); }); }
+        function addTransaction(type, description, amount, status, notes = '') {
+            const newTx = { date: new Date().toISOString(), brand: type, type: description, amount: amount, status: status, notes: notes };
+            transactions.unshift(newTx);
+            if (transactions.length > 500) transactions.pop(); // লেনদেনের সীমা বাড়ানো হলো
+        }
+        
+        const createTxHtml = (tx) => {
+            const icon = tx.status === 'income' ? '📥' : '📤';
+            const noteHtml = tx.notes ? `<div class="tx-note">নোট: ${tx.notes}</div>` : '';
+            const dateHtml = `<div class="tx-note">${new Date(tx.date).toLocaleString('bn-BD')}</div>`;
 
-        // --- রিসেট ও মোডাল ফাংশন ---
-        function resetBankData() { localStorage.removeItem('bankBalance_v16'); localStorage.removeItem('loanDetails_v16'); location.reload(); }
-        function resetUserData() { localStorage.removeItem('userBalance_v16'); localStorage.removeItem('reserveFund_v16'); localStorage.removeItem('currentIncome_v16'); localStorage.removeItem('currentExpenses_v16'); localStorage.removeItem('currentFees_v16'); localStorage.removeItem('transactions_v16'); localStorage.removeItem('emiPurchases_v16'); location.reload(); }
+            return `<li>
+                <div class="tx-icon">${icon}</div>
+                <div class="tx-details">
+                    <div class="name">${tx.brand}</div>
+                    <div class="type">${tx.type}</div>
+                    ${noteHtml}${dateHtml}
+                </div>
+                <div class="tx-amount ${tx.status}">${tx.status === 'income' ? '+' : '-'} ${formatCurrency(tx.amount)}</div>
+            </li>`;
+        };
+
+        function renderTransactions() {
+            const listEl = document.getElementById('recentTxList');
+            listEl.innerHTML = '';
+            const toShow = transactions.slice(0, 5);
+            if (toShow.length === 0) { listEl.innerHTML = '<li><center style="padding: 20px; color: var(--text-light);"><i>কোনো লেনদেন পাওয়া যায়নি।</i></center></li>'; return; }
+            listEl.innerHTML = toShow.map(createTxHtml).join('');
+        }
+
+        // --- সম্পূর্ণ লেনদেন বিবরণীর নতুন ফাংশন ---
+        function openHistoryModal() {
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            renderFullHistory();
+            openModal('historyModal');
+        }
+
+        function renderFullHistory() {
+            const listEl = document.getElementById('fullHistoryList');
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            let filteredTx = [...transactions];
+
+            if (startDate) {
+                const start = new Date(startDate).setHours(0, 0, 0, 0);
+                filteredTx = filteredTx.filter(tx => new Date(tx.date) >= start);
+            }
+            if (endDate) {
+                const end = new Date(endDate).setHours(23, 59, 59, 999);
+                filteredTx = filteredTx.filter(tx => new Date(tx.date) <= end);
+            }
+
+            if (filteredTx.length === 0) {
+                listEl.innerHTML = '<li><center style="padding: 20px; color: var(--text-light);"><i>এই সময়সীমার মধ্যে কোনো লেনদেন পাওয়া যায়নি।</i></center></li>';
+                return;
+            }
+            listEl.innerHTML = filteredTx.map(createTxHtml).join('');
+        }
+
+        function resetBankData() { localStorage.removeItem('bankBalance_v18'); localStorage.removeItem('loanDetails_v18'); location.reload(); }
+        function resetUserData() { localStorage.removeItem('userBalance_v18'); localStorage.removeItem('reserveFund_v18'); localStorage.removeItem('currentIncome_v18'); localStorage.removeItem('currentExpenses_v18'); localStorage.removeItem('currentFees_v18'); localStorage.removeItem('transactions_v18'); localStorage.removeItem('emiPurchases_v18'); location.reload(); }
         function resetAllData() { localStorage.clear(); location.reload(); }
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
         function openModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
 
-        // --- Initialization ---
         window.onload = () => {
             loadDataFromLocalStorage();
             document.getElementById('cardHolderNameDisplayTop').textContent = "সাদমান সাদিক";
