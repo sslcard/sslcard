@@ -147,6 +147,7 @@
         }
         
         function formatCurrency(amount) { return `৳${parseFloat(amount).toLocaleString('bn-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; }
+        
         function updateUIData() {
             const totalBalance = userBalance + bankBalance;
             document.getElementById('displayTotalBalance').textContent = formatCurrency(totalBalance);
@@ -179,8 +180,41 @@
         
         function addBankFunds() { const amount = parseFloat(document.getElementById('addBankAmount').value); if (isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক পরিমাণ লিখুন।', 'error'); return; } bankBalance += amount; currentIncome += amount; addTransaction('ব্যাংক ফান্ড', 'ব্যাংক থেকে ফান্ড প্রাপ্তি', amount, 'income'); closeModal('addBankFundsModal'); showStatus('সফল', `${formatCurrency(amount)} ব্যাংক ফান্ড হিসেবে যোগ হয়েছে।`); updateUIData(); }
         function addUserCash() { const amount = parseFloat(document.getElementById('addUserAmount').value); const method = document.getElementById('paymentMethod').value; if (isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক পরিমাণ লিখুন।', 'error'); return; } userBalance += amount; currentIncome += amount; addTransaction('ব্যক্তিগত ক্যাশ', `${method} দিয়ে জমা`, amount, 'income'); closeModal('addUserCashModal'); showStatus('সফল', `${formatCurrency(amount)} ব্যক্তিগত ক্যাশ হিসেবে যোগ হয়েছে।`); updateUIData(); }
-        function takeLoan() { const amount = parseFloat(document.getElementById('loanAmount').value); const installments = parseInt(document.getElementById('loanInstallments').value); if (isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক পরিমাণ লিখুন।', 'error'); return; } if (loanDetails) { showStatus('ত্রুটি', 'আপনার ইতিমধ্যে একটি লোন চলমান আছে।', 'error'); return; } if (processFinancialTransaction(amount, 'লোন গ্রহণ', `${installments} মাসের কিস্তিতে লোন`)) { reserveFund += amount; loanDetails = { totalLoan: amount, remainingLoan: amount, installments: installments, monthlyPayment: amount / installments }; addTransaction('রিজার্ভ ফান্ড', 'লোনের জন্য ফান্ড লক', amount, 'outcome', 'সিস্টেম দ্বারা লোন অনুমোদিত'); closeModal('takeLoanModal'); showStatus('লোন সফল', `${formatCurrency(amount)} লোন প্রক্রিয়া সফল হয়েছে।`); updateUIData(); } }
-        function processEmiPurchase() { const product = document.getElementById('emiProduct').value; const amount = parseFloat(document.getElementById('emiAmount').value); const installments = parseInt(document.getElementById('emiInstallments').value); const notes = document.getElementById('emiNotes').value; if (!product || isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক তথ্য দিন।', 'error'); return; } if (processFinancialTransaction(amount, 'EMI ক্রয়', product)) { reserveFund += amount; const emi = { id: Date.now(), productName: product, totalAmount: amount, remainingAmount: amount, installments: installments, monthlyPayment: amount / installments, notes: notes }; emiPurchases.push(emi); addTransaction('রিজার্ভ ফান্ড', `${product}-এর জন্য ফান্ড লক`, amount, 'outcome', notes); closeModal('emiPurchaseModal'); showStatus('সফল', `${product}-এর জন্য ${formatCurrency(amount)} EMI ক্রয় সফল।`); updateUIData(); } }
+
+        // --- মূল লজিক অনুযায়ী লোন এবং EMI ফাংশন ---
+        function takeLoan() { 
+            const amount = parseFloat(document.getElementById('loanAmount').value); 
+            const installments = parseInt(document.getElementById('loanInstallments').value); 
+            if (isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক পরিমাণ লিখুন।', 'error'); return; } 
+            if (loanDetails) { showStatus('ত্রুটি', 'আপনার ইতিমধ্যে একটি লোন চলমান আছে।', 'error'); return; } 
+            // টাকা মূল ব্যালেন্স থেকে কেটে রিজার্ভে যাবে
+            if (processFinancialTransaction(amount, 'লোন গ্রহণ', `${installments} মাসের কিস্তিতে লোন`)) { 
+                reserveFund += amount; 
+                loanDetails = { totalLoan: amount, remainingLoan: amount, installments: installments, monthlyPayment: amount / installments }; 
+                addTransaction('রিজার্ভ ফান্ড', 'লোনের জন্য ফান্ড লক', amount, 'outcome', 'সিস্টেম দ্বারা লোন অনুমোদিত'); 
+                closeModal('takeLoanModal'); 
+                showStatus('লোন সফল', `${formatCurrency(amount)} লোন প্রক্রিয়া সফল হয়েছে এবং টাকা রিজার্ভে লক করা হয়েছে।`); 
+                updateUIData(); 
+            } 
+        }
+
+        function processEmiPurchase() { 
+            const product = document.getElementById('emiProduct').value; 
+            const amount = parseFloat(document.getElementById('emiAmount').value); 
+            const installments = parseInt(document.getElementById('emiInstallments').value); 
+            const notes = document.getElementById('emiNotes').value; 
+            if (!product || isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক তথ্য দিন।', 'error'); return; } 
+            // টাকা মূল ব্যালেন্স থেকে কেটে রিজার্ভে যাবে
+            if (processFinancialTransaction(amount, 'EMI ক্রয়', product, 0, notes)) { 
+                reserveFund += amount; 
+                const emi = { id: Date.now(), productName: product, totalAmount: amount, remainingAmount: amount, installments: installments, monthlyPayment: amount / installments, notes: notes }; 
+                emiPurchases.push(emi); 
+                addTransaction('রিজার্ভ ফান্ড', `${product}-এর জন্য ফান্ড লক`, amount, 'outcome', notes); 
+                closeModal('emiPurchaseModal'); 
+                showStatus('সফল', `${product}-এর জন্য ${formatCurrency(amount)} EMI ক্রয় সফল।`); 
+                updateUIData(); 
+            } 
+        }
         
         function openPayInstallmentModal(type, index = null) {
             document.getElementById('installmentType').value = type;
@@ -209,8 +243,46 @@
             closeModal('payInstallmentModal');
         }
 
-        function payLoanInstallment(paymentAmount) { if (!loanDetails) return; userBalance += paymentAmount; reserveFund -= paymentAmount; currentIncome += paymentAmount; loanDetails.remainingLoan -= paymentAmount; addTransaction('লোন পরিশোধ', 'রিজার্ভ থেকে ফেরত', paymentAmount, 'income'); if (loanDetails.remainingLoan < 1) { loanDetails = null; showStatus('সফল', 'আপনার লোনটি সম্পূর্ণরূপে পরিশোধ করা হয়েছে।'); } else { showStatus('সফল', `${formatCurrency(paymentAmount)} পরিশোধ করা হয়েছে।`); } updateUIData(); }
-        function payEmiInstallment(index, paymentAmount) { const emi = emiPurchases[index]; if (!emi) return; userBalance += paymentAmount; reserveFund -= paymentAmount; currentIncome += paymentAmount; emi.remainingAmount -= paymentAmount; addTransaction('EMI পরিশোধ', `${emi.productName}-এর কিস্তি ফেরত`, paymentAmount, 'income'); if (emi.remainingAmount < 1) { emiPurchases.splice(index, 1); showStatus('সফল', `${emi.productName}-এর EMI সম্পূর্ণরূপে পরিশোধ করা হয়েছে।`); } else { showStatus('সফল', `${formatCurrency(paymentAmount)} কিস্তি পরিশোধ করা হয়েছে।`); } updateUIData(); }
+        // মূল লজিক অনুযায়ী কিস্তি পরিশোধ ফাংশন
+        function payLoanInstallment(paymentAmount) { 
+            if (!loanDetails || paymentAmount > reserveFund) {
+                showStatus('ত্রুটি', 'রিজার্ভ ফান্ডে অপর্যাপ্ত ব্যালেন্স।', 'error');
+                return;
+            }
+            // টাকা রিজার্ভ থেকে মূল ব্যালেন্সে ফেরত আসবে
+            userBalance += paymentAmount; 
+            reserveFund -= paymentAmount; 
+            currentIncome += paymentAmount; 
+            loanDetails.remainingLoan -= paymentAmount; 
+            addTransaction('লোন পরিশোধ', 'রিজার্ভ থেকে ফেরত', paymentAmount, 'income'); 
+            if (loanDetails.remainingLoan < 1) { 
+                loanDetails = null; 
+                showStatus('সফল', 'আপনার লোনটি সম্পূর্ণরূপে পরিশোধ করা হয়েছে।'); 
+            } else { 
+                showStatus('সফল', `${formatCurrency(paymentAmount)} পরিশোধ করা হয়েছে।`); 
+            } 
+            updateUIData(); 
+        }
+        function payEmiInstallment(index, paymentAmount) { 
+            const emi = emiPurchases[index]; 
+            if (!emi || paymentAmount > reserveFund) {
+                showStatus('ত্রুটি', 'রিজার্ভ ফান্ডে অপর্যাপ্ত ব্যালেন্স।', 'error');
+                return;
+            }
+            // টাকা রিজার্ভ থেকে মূল ব্যালেন্সে ফেরত আসবে
+            userBalance += paymentAmount; 
+            reserveFund -= paymentAmount; 
+            currentIncome += paymentAmount; 
+            emi.remainingAmount -= paymentAmount; 
+            addTransaction('EMI পরিশোধ', `${emi.productName}-এর কিস্তি ফেরত`, paymentAmount, 'income'); 
+            if (emi.remainingAmount < 1) { 
+                emiPurchases.splice(index, 1); 
+                showStatus('সফল', `${emi.productName}-এর EMI সম্পূর্ণরূপে পরিশোধ করা হয়েছে।`); 
+            } else { 
+                showStatus('সফল', `${formatCurrency(paymentAmount)} কিস্তি পরিশোধ করা হয়েছে।`); 
+            } 
+            updateUIData(); 
+        }
 
         function addBalance() { const amount = parseFloat(document.getElementById('addAmount').value); if (isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক পরিমাণ লিখুন।', 'error'); return; } userBalance += amount; currentIncome += amount; addTransaction('ব্যালেন্স পেমেন্ট', 'পেমেন্ট করা হয়েছে', amount, 'income'); closeModal('addBalanceModal'); showStatus('পেমেন্ট সফল', `${formatCurrency(amount)} পেমেন্ট সফল হয়েছে।`); updateUIData(); }
         function processFinancialTransaction(amount, type, description, fee = 0, notes = '') { const totalCost = amount + fee; const totalAvailable = userBalance + bankBalance; if (totalCost > totalAvailable) { showStatus('অপর্যাপ্ত ব্যালেন্স', `আপনার মোট ব্যালেন্স ${formatCurrency(totalAvailable)}। প্রয়োজন ${formatCurrency(totalCost)}`, 'error'); return false; } let deductedFromUser = Math.min(totalCost, userBalance); userBalance -= deductedFromUser; let remainingToDeduct = totalCost - deductedFromUser; bankBalance -= remainingToDeduct; currentExpenses += amount; currentFees += fee; addTransaction(type, description, amount, 'outcome', notes); if (fee > 0) addTransaction('ফি', `${type} চার্জ`, fee, 'outcome'); return true; }
@@ -218,12 +290,38 @@
         function mobileRecharge() { const number = document.getElementById('rechargeNumber').value.trim(); const amount = parseFloat(document.getElementById('rechargeAmount').value); const notes = document.getElementById('rechargeNotes').value.trim(); if (!number || isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক তথ্য দিন।', 'error'); return; } if (processFinancialTransaction(amount, 'মোবাইল রিচার্জ', `নম্বর: ${number}`, 0, notes)) { showStatus('রিচার্জ সফল', `${formatCurrency(amount)} সফলভাবে ${number}-এ রিচার্জ হয়েছে।`); closeModal('rechargeModal'); updateUIData(); } }
         function payBill() { const type = document.getElementById('billType').value.trim(); const amount = parseFloat(document.getElementById('billAmount').value); const notes = document.getElementById('billNotes').value.trim(); if (!type || isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক তথ্য দিন।', 'error'); return; } if (processFinancialTransaction(amount, 'বিল পে', `বিলের ধরন: ${type}`, 0, notes)) { showStatus('বিল পরিশোধিত', `${formatCurrency(amount)} টাকার ${type} বিল পরিশোধ করা হয়েছে।`); closeModal('billPayModal'); updateUIData(); } }
         function updateCashOutFee() { const amount = parseFloat(document.getElementById('cashOutAmount').value) || 0; const method = document.getElementById('cashOutMethod').value; let fee = 0; if (amount > 0) { if (method === 'atm') { fee = cashOutCharges.atm; } else { fee = amount * cashOutCharges[method]; } } document.getElementById('cashOutFee').value = formatCurrency(fee); }
-        function cashOut() { const amount = parseFloat(document.getElementById('cashOutAmount').value); const method = document.getElementById('cashOutMethod').value; const notes = document.getElementById('cashOutNotes').value.trim(); if (isNaN(amount) || amount <= 0) { showStatus('ত্রুটি', 'সঠিক পরিমাণ লিখুন।', 'error'); return; } const fee = parseFloat(document.getElementById('cashOutFee').value.replace('৳', '').replace(/,/g, '')); if (processFinancialTransaction(amount, 'ক্যাশ আউট', `মাধ্যম: ${method.toUpperCase()}`, fee, notes)) { showStatus('ক্যাশ আউট সফল', `${formatCurrency(amount)} ক্যাশ আউট হয়েছে। ফি: ${formatCurrency(fee)}`); closeModal('cashOutModal'); updateUIData(); } }
+        
+        // --- ক্যাশ আউট ফাংশন (সংশোধিত, NaN বাগ ফিক্সড) ---
+        function cashOut() {
+            const amount = parseFloat(document.getElementById('cashOutAmount').value);
+            const method = document.getElementById('cashOutMethod').value;
+            const notes = document.getElementById('cashOutNotes').value.trim();
+            if (isNaN(amount) || amount <= 0) {
+                showStatus('ত্রুটি', 'সঠিক পরিমাণ লিখুন।', 'error');
+                return;
+            }
+            
+            // ফি সরাসরি হিসাব করা হচ্ছে, DOM থেকে পড়া হচ্ছে না
+            let fee = 0;
+            if (amount > 0) {
+                if (method === 'atm') {
+                    fee = cashOutCharges.atm;
+                } else {
+                    fee = amount * cashOutCharges[method];
+                }
+            }
+
+            if (processFinancialTransaction(amount, 'ক্যাশ আউট', `মাধ্যম: ${method.toUpperCase()}`, fee, notes)) {
+                showStatus('ক্যাশ আউট সফল', `${formatCurrency(amount)} ক্যাশ আউট হয়েছে। ফি: ${formatCurrency(fee)}`);
+                closeModal('cashOutModal');
+                updateUIData();
+            }
+        }
 
         function addTransaction(type, description, amount, status, notes = '') {
             const newTx = { date: new Date().toISOString(), brand: type, type: description, amount: amount, status: status, notes: notes };
             transactions.unshift(newTx);
-            if (transactions.length > 500) transactions.pop(); // লেনদেনের সীমা বাড়ানো হলো
+            if (transactions.length > 500) transactions.pop();
         }
         
         const createTxHtml = (tx) => {
@@ -250,7 +348,6 @@
             listEl.innerHTML = toShow.map(createTxHtml).join('');
         }
 
-        // --- সম্পূর্ণ লেনদেন বিবরণীর নতুন ফাংশন ---
         function openHistoryModal() {
             document.getElementById('startDate').value = '';
             document.getElementById('endDate').value = '';
